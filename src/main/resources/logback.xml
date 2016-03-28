@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <configuration debug="true"> 调试模式下，可输出logback的内部日志信息 -->
+<configuration debug="false">
+
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 [%file:%line]日志所在文件及行数 %msg%n消息及换行-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%level][%thread]:%logger{50} [%method:%line] %msg%n</pattern>
+        </encoder>
+
+    </appender>
+
+    <!-- 按照每天生成日志文件 -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.file}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名 -->
+            <fileNamePattern>${log.file}.%d{yyyy-MM-dd}.%i</fileNamePattern>
+            <!--日志文件保留天数 -->
+            <maxHistory>30</maxHistory>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <!-- or whenever the file size reaches 100MB -->
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符 -->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%level][%thread]:%logger{50} [%method:%line] %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 0不丢失日志, 但如果队列满, 则会阻塞当前线程. 默认值为20,如果队列的80%已满,则会丢弃TRACT、DEBUG、INFO级别的日志 -->
+        <!--<discardingThreshold>0</discardingThreshold>-->
+        <!-- 更改默认的队列的深度, 该值会影响性能, 占用堆大小. 默认值为256 -->
+        <queueSize>1024</queueSize>
+        <!-- 添加附加的appender,最多只能添加一个 -->
+        <appender-ref ref="${log.appender}"/>
+    </appender>
+
+    <!--<logger name="org.mybatis.spring.SqlSessionUtils" level="${log.level}">
+        <appender-ref ref="STDOUT"/>
+    </logger>-->
+
+    <root level="${log.level}">
+        <appender-ref ref="ASYNC"/>
+    </root>
+</configuration>
